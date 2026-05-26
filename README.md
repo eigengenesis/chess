@@ -1,6 +1,6 @@
 # VOID Chess
 
-VOID is a small spatial chess model that operates directly on board tensors and moves, not text notation or rendered pixels.
+VOID is a small spatial world model for chess. It operates directly on board tensors and moves, not text notation or rendered pixels, and learns to choose actions through recurrent latent-state refinement.
 
 ![VOID architecture](void_architecture.svg)
 
@@ -9,6 +9,12 @@ VOID is a small spatial chess model that operates directly on board tensors and 
 The model encodes a chess board as an `8x8` spatial tensor and keeps that topology throughout the network. Its core block shifts information across the board in the center, orthogonal, and diagonal directions, then contracts those local views into a latent map.
 
 After encoding, a shared recurrent "ghost" loop refines the latent board state for a configurable number of thinking steps. The same weights are reused at every step, so inference can trade compute for stronger decisions by increasing `n_think`.
+
+## World Model + Active Inference
+
+VOID is trained not only to imitate strong moves, but also to model the consequences of actions. Given a board and a candidate move, the action-conditioned world-model head predicts the next board state in the same spatial representation. This adds a chess-physics objective alongside policy learning: pieces, turns, captures, and transitions must become part of the latent dynamics.
+
+The policy is active-inference-style: the model refines an internal board state, evaluates possible action pressure through value and terminal-distance heads, and learns to prefer moves that lead toward better future states. In endgames, the terminal-distance objective adds conversion pressure, encouraging the model to resolve winning positions instead of only predicting that they are good.
 
 The architecture includes:
 
