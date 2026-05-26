@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">VOID architecture diagram</title>
+  <desc id="desc">A clean architecture diagram for VOID: spatial input, geometric encoder, latent world state, recurrent ghost loop, world model dynamics, and action/value heads.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111827"/>
+    </marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+    <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .bg { fill: #f8fafc; }
+      .panel { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; filter: url(#soft-shadow); }
+      .panel-strong { fill: #eef6ff; stroke: #2563eb; stroke-width: 2.5; filter: url(#soft-shadow); }
+      .panel-loop { fill: #f7fee7; stroke: #65a30d; stroke-width: 2.5; filter: url(#soft-shadow); }
+      .panel-output { fill: #fff7ed; stroke: #ea580c; stroke-width: 2.5; filter: url(#soft-shadow); }
+      .title { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 76px; font-weight: 800; fill: #020617; letter-spacing: 0; }
+      .subtitle { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 28px; font-weight: 500; fill: #475569; letter-spacing: 0; }
+      .label { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 28px; font-weight: 760; fill: #0f172a; letter-spacing: 0; }
+      .small { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 19px; font-weight: 500; fill: #475569; letter-spacing: 0; }
+      .tiny { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 16px; font-weight: 560; fill: #64748b; letter-spacing: 0; }
+      .line { fill: none; stroke: #111827; stroke-width: 3.2; marker-end: url(#arrow); }
+      .accent-line { fill: none; stroke: #2563eb; stroke-width: 3.2; marker-end: url(#arrow-accent); }
+      .loop-line { fill: none; stroke: #65a30d; stroke-width: 3.2; marker-end: url(#arrow); }
+      .grid-line { stroke: #cbd5e1; stroke-width: 1.2; }
+      .node { fill: #ffffff; stroke: #94a3b8; stroke-width: 2; }
+      .node-accent { fill: #dbeafe; stroke: #2563eb; stroke-width: 2; }
+      .node-loop { fill: #ecfccb; stroke: #65a30d; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="1000"/>
+
+  <text class="subtitle" x="800" y="135" text-anchor="middle">spatial world model with recurrent latent thinking</text>
+
+  <!-- Input spatial state -->
+  <rect class="panel" x="90" y="300" width="230" height="260" rx="18"/>
+  <text class="label" x="205" y="345" text-anchor="middle">Spatial State</text>
+  <text class="small" x="205" y="380" text-anchor="middle">raw structured field</text>
+  <g transform="translate(133,410)">
+    <rect x="0" y="0" width="144" height="108" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>
+    <path class="grid-line" d="M24 0 V108 M48 0 V108 M72 0 V108 M96 0 V108 M120 0 V108"/>
+    <path class="grid-line" d="M0 27 H144 M0 54 H144 M0 81 H144"/>
+    <circle cx="36" cy="27" r="9" fill="#2563eb"/>
+    <circle cx="96" cy="54" r="9" fill="#65a30d"/>
+    <circle cx="120" cy="81" r="9" fill="#ea580c"/>
+  </g>
+  <text class="tiny" x="205" y="540" text-anchor="middle">topology stays intact</text>
+
+  <!-- Encoder -->
+  <rect class="panel" x="405" y="250" width="275" height="360" rx="18"/>
+  <text class="label" x="542" y="295" text-anchor="middle">Geometric Encoder</text>
+  <text class="small" x="542" y="330" text-anchor="middle">pointwise projection</text>
+  <text class="small" x="542" y="360" text-anchor="middle">directional shifts</text>
+  <text class="small" x="542" y="390" text-anchor="middle">local-to-global mixing</text>
+  <g transform="translate(482,430)">
+    <circle class="node" cx="60" cy="60" r="44"/>
+    <circle class="node-accent" cx="60" cy="60" r="10"/>
+    <path d="M60 16 V0 M60 104 V120 M16 60 H0 M104 60 H120 M28 28 L8 8 M92 28 L112 8 M28 92 L8 112 M92 92 L112 112" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <text class="tiny" x="542" y="585" text-anchor="middle">shared spatial primitives</text>
+
+  <!-- Latent world state -->
+  <rect class="panel-strong" x="760" y="250" width="290" height="360" rx="18"/>
+  <text class="label" x="905" y="295" text-anchor="middle">Latent World State</text>
+  <text class="small" x="905" y="330" text-anchor="middle">board-shaped memory</text>
+  <text class="small" x="905" y="360" text-anchor="middle">constraint-aware state</text>
+  <g transform="translate(823,410)">
+    <rect x="0" y="0" width="164" height="116" rx="14" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <rect x="22" y="22" width="120" height="72" rx="10" fill="#ffffff" stroke="#60a5fa" stroke-width="2"/>
+    <path d="M44 58 H120 M82 34 V82" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="82" cy="58" r="12" fill="#2563eb"/>
+  </g>
+  <text class="tiny" x="905" y="585" text-anchor="middle">the model thinks inside this state</text>
+
+  <!-- Ghost loop -->
+  <rect class="panel-loop" x="1135" y="210" width="335" height="440" rx="18"/>
+  <text class="label" x="1302" y="255" text-anchor="middle">Recurrent Ghost Loop</text>
+  <text class="small" x="1302" y="290" text-anchor="middle">same weights, repeated updates</text>
+  <text class="small" x="1302" y="320" text-anchor="middle">variable thinking time</text>
+  <g transform="translate(1210,380)">
+    <path d="M92 0 C150 0 184 44 184 92 C184 148 142 184 92 184 C40 184 0 148 0 92 C0 48 28 16 66 5" fill="none" stroke="#65a30d" stroke-width="10" stroke-linecap="round"/>
+    <path d="M66 5 L62 36 L94 18 Z" fill="#65a30d"/>
+    <circle cx="92" cy="92" r="44" fill="#ffffff" stroke="#65a30d" stroke-width="3"/>
+    <text class="label" x="92" y="101" text-anchor="middle" font-size="26">n</text>
+  </g>
+  <text class="tiny" x="1302" y="615" text-anchor="middle">more steps = deeper latent computation</text>
+
+  <!-- Heads -->
+  <rect class="panel-output" x="760" y="745" width="290" height="150" rx="18"/>
+  <text class="label" x="905" y="790" text-anchor="middle">Action Policy</text>
+  <text class="small" x="905" y="825" text-anchor="middle">choose an action</text>
+  <text class="tiny" x="905" y="860" text-anchor="middle">from latent state, not tokens</text>
+
+  <rect class="panel" x="1135" y="745" width="335" height="150" rx="18"/>
+  <text class="label" x="1302" y="790" text-anchor="middle">World Dynamics</text>
+  <text class="small" x="1302" y="825" text-anchor="middle">predict next state</text>
+  <text class="tiny" x="1302" y="860" text-anchor="middle">state + action -> future state</text>
+
+  <rect class="panel" x="405" y="745" width="275" height="150" rx="18"/>
+  <text class="label" x="542" y="790" text-anchor="middle">Value Field</text>
+  <text class="small" x="542" y="825" text-anchor="middle">evaluate outcomes</text>
+  <text class="tiny" x="542" y="860" text-anchor="middle">pressure toward useful states</text>
+
+  <!-- Connections -->
+  <path class="line" d="M320 430 H405"/>
+  <path class="line" d="M680 430 H760"/>
+  <path class="accent-line" d="M1050 430 H1135"/>
+  <path class="loop-line" d="M1135 520 C1080 610 990 650 905 650 C820 650 770 620 760 565"/>
+  <path class="line" d="M905 610 V745"/>
+  <path class="line" d="M1045 820 H1135"/>
+  <path class="line" d="M760 820 H680"/>
+  <path class="accent-line" d="M1302 745 C1302 700 1275 680 1225 670 C1120 650 1050 620 1025 585"/>
+
+  <!-- Footer notes -->
+  <text class="tiny" x="800" y="950" text-anchor="middle">spatial input -> latent world state -> recurrent thinking -> action and future-state prediction</text>
+</svg>
