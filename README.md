@@ -11,25 +11,48 @@ Play the hosted demo: [chess.eigenesis.org](https://chess.eigenesis.org)
 
 ![VOID architecture](void_architecture.svg)
 
+## Core Idea
+
+VOID is built around one bet: for spatial intelligence, geometry should be part of the computation itself instead of something the model has to rediscover from token positions.
+
+The model operates directly on continuous spatial tensors. In the chess benchmark, the input is an `8x8` board tensor with piece, turn, and state planes. There is no text notation, rendered pixel input, or patch tokenization step. The board remains a board throughout the network.
+
+The core operation is geometric shift + contraction:
+
+```text
+spatial tensor -> directional shifts -> tensor contractions -> latent spatial map
+```
+
+Each block uses `torch.roll` to move information across the grid in the center, orthogonal, and diagonal directions. A north shift, diagonal shift, or file/rank shift is not represented as an abstract token relationship; it is literally a movement of information across the spatial field. The shifted views are then mixed with learned tensor contractions using `einsum`.
+
+This gives VOID a strong spatial inductive bias:
+
+- local relations are available immediately through directional shifts
+- longer-range relations emerge by stacking blocks and recurrent steps
+- board topology is preserved instead of flattened into a sequence
+- the same mechanism applies to grids, games, depth maps, constraint fields, and other continuous spatial states
+
+After encoding, VOID runs a shared recurrent **ghost loop** over the latent map. The same weights are reused at each thinking step, so the model can spend more compute without adding more parameters. In practice, increasing `n_think` lets the same model refine its internal state before choosing an action.
+
+This makes VOID closer to a spatial world model than a standard feedforward policy. It does not only map `state -> action`; it maintains a latent spatial state, iterates on it, predicts action consequences, and uses those imagined futures during inference.
+
 ## Architecture
 
-VOID encodes spatial states as tensors and keeps their topology throughout the network. In the chess variant, the state is an `8x8` board tensor. The core block shifts information across the board in the center, orthogonal, and diagonal directions, then contracts those local views into a latent map.
+The chess benchmark uses this VOID core with several heads on top:
 
-After encoding, a shared recurrent "ghost" loop refines the latent board state for a configurable number of thinking steps. The same weights are reused at every step, so inference can trade compute for stronger decisions by increasing `n_think`.
+- `from_square` and `to_square` policy heads for spatial action prediction
+- a value head for outcome estimation
+- a legality head for move-validity pressure
+- an action-conditioned transition head for `board + move -> next board`
+- a terminal-distance head for conversion pressure in endgames
+
+The transition head turns the model into an explicit world model. Given a candidate move, it predicts the next board tensor in the same spatial representation. This forces the latent state to learn chess physics: piece movement, captures, turns, castling, and board transitions.
 
 ## World Model + Active Inference
 
-The chess variant is trained not only to imitate strong moves, but also to model the consequences of actions. Given a board and a candidate move, the action-conditioned world-model head predicts the next board state in the same spatial representation. This adds a chess-physics objective alongside policy learning: pieces, turns, captures, and transitions must become part of the latent dynamics.
+The chess variant is trained not only to imitate strong moves, but also to model the consequences of actions. This adds a chess-physics objective alongside policy learning: pieces, turns, captures, and transitions must become part of the latent dynamics.
 
 The policy is active-inference-style: the model refines an internal latent state, evaluates possible action pressure through value and terminal-distance heads, and learns to prefer moves that lead toward better future states. In endgames, the terminal-distance objective adds conversion pressure, encouraging the model to resolve winning positions instead of only predicting that they are good.
-
-The architecture includes:
-
-- policy heads for `from_square` and `to_square`
-- a value head for game outcome prediction
-- an action-conditioned world-model head for next-board prediction
-- a terminal-distance head for endgame conversion pressure
-- optional legality and curriculum auxiliary losses
 
 ## Inference
 
