@@ -1,8 +1,9 @@
-# VOID: Chess Benchmark
+# Void: Sequence Modeling Architecture 
+The foundational architecture: gravitational shifts, tensor contractions, and latent recurrence for continuous-domain sequence modeling.
+VOID is a spatial world-model architecture. 
+Chess is one benchmark variation of it: a compact testbed for latent spatial reasoning, action prediction, and active-inference-style policy learning.
 
-VOID is a spatial world-model architecture. Chess is one benchmark variation of it: a compact testbed for latent spatial reasoning, action prediction, and active-inference-style policy learning.
-
-This chess instantiation operates directly on board tensors and moves, not text notation or rendered pixels. In current pre-RL benchmarks, it plays above 1650 Elo; the next stage is reinforcement learning.
+This chess instantiation operates directly on board tensors and moves, not text notation or rendered pixels. In current pre-RL benchmarks, The model shows high variance in capabilities demonstrating something fascinating where it wins a small percentage of games against high elo like stockfish 2500 as well. This suggests that it does not act like a generic chess engine. RL is the probable solution for this, the estimated elo is around 1600; the next stage is reinforcement learning.
 
 Play the hosted demo: [chess.eigenesis.org](https://chess.eigenesis.org)
 
