@@ -4,6 +4,8 @@ VOID is a spatial world-model architecture. Chess is one benchmark variation of 
 
 This chess instantiation operates directly on board tensors and moves, not text notation or rendered pixels. In current pre-RL benchmarks, it plays above 1650 Elo; the next stage is reinforcement learning.
 
+Play the hosted demo: [chess.eigenesis.org](https://chess.eigenesis.org)
+
 ![VOID chess playing](chess.gif)
 
 ![VOID architecture](void_architecture.svg)
@@ -27,6 +29,20 @@ The architecture includes:
 - an action-conditioned world-model head for next-board prediction
 - a terminal-distance head for endgame conversion pressure
 - optional legality and curriculum auxiliary losses
+
+## Inference
+
+The default player can act directly from the policy head: board state in, ranked legal moves out. The hosted demo also includes **Imagine mode**, an energy-rollout world-model player.
+
+In Imagine mode, the model evaluates candidate legal moves by rolling them forward through its learned world model:
+
+```text
+candidate move -> imagined opponent reply -> imagined follow-up
+```
+
+The imagined line is scored with a learned energy objective that combines the policy prior, future value, rollout confidence, material pressure, and terminal-distance pressure. This keeps the policy grounded while letting the world model prefer futures that look stronger after imagined consequences.
+
+In current head-to-head benchmark runs, Imagine mode consistently outperforms the direct policy player.
 
 ## Curriculum
 
