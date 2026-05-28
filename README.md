@@ -5,6 +5,8 @@ Chess is one benchmark variation of it: a compact testbed for latent spatial rea
 
 This chess instantiation operates directly on board tensors and moves, not text notation or rendered pixels. In current pre-RL benchmarks, The model shows high variance in capabilities demonstrating something fascinating where it wins a small percentage of games against high elo like stockfish 2500 as well. This suggests that it does not act like a generic chess engine. RL is the probable solution for this, the estimated elo is around 1600; the next stage is reinforcement learning.
 
+> **`chess.pt`** is the pre-RL checkpoint (Phase 4 curriculum, ~250k steps, 11M params, 42MB). RL post-training is currently in progress.
+
 Play the hosted demo: [chess.eigenesis.org](https://chess.eigenesis.org)
 
 ![VOID chess playing](chess.gif)
