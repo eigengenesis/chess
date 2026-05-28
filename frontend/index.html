@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chess</title>
+    <link rel="stylesheet" href="./styles.css?v=20260527ab" />
+    <script src="./config.js?v=20260520"></script>
+    <script type="module" src="./app.js?v=20260527ab"></script>
+  </head>
+  <body>
+    <div class="preview-badge">(preview)</div>
+    <main class="app">
+      <section class="board-stage" aria-label="Chess game">
+        <div class="board" id="board" aria-label="Chess board"></div>
+
+        <div class="status">
+          <span id="gameStatus">White to move</span>
+          <span id="connectionStatus">Checking</span>
+          <span id="wakeHint">Cold start can take ~90s.</span>
+        </div>
+
+        <div class="controls" aria-label="Game controls">
+          <button id="wakeApi">Start model</button>
+          <button id="newGame">New</button>
+          <button id="undoMove">Undo</button>
+          <button id="flipBoard">Flip</button>
+          <button id="playWhite" data-color="w" class="active">White</button>
+          <button id="playBlack" data-color="b">Black</button>
+        </div>
+
+        <div class="rollout-strip" aria-label="Inference mode">
+          <button id="rolloutMode" class="rollout-toggle" aria-describedby="rolloutTip">
+            <span class="rollout-dot" aria-hidden="true"></span>
+            <span>Imagine</span>
+          </button>
+          <div class="rollout-tooltip" id="rolloutTip" role="tooltip">
+            Imagine mode uses world-model-guided planning: candidate move, opponent reply, follow-up, then a learned energy score chooses the future it prefers. It is active-inference-inspired, using imagined futures and learned energy as a free-energy proxy. This energy-rollout world-model player consistently outperforms the direct policy player in head-to-head benchmarks.
+          </div>
+        </div>
+      </section>
+
+      <aside class="move-panel side-panel" aria-label="Move trace">
+        <div class="panel-head">
+          <div>
+            <span class="kicker">Move policy</span>
+            <h1>Selection Trace</h1>
+          </div>
+        </div>
+
+        <section class="model-block compact-block">
+          <div class="section-label">Candidate moves</div>
+          <div class="candidate-list" id="candidateMoves"></div>
+        </section>
+
+        <section class="model-block trace-block">
+          <div class="section-label">Recurrent steps</div>
+          <div class="trace-list" id="thinkTrace"></div>
+        </section>
+      </aside>
+
+      <aside class="prescience side-panel" aria-label="Forward pass trace">
+        <div class="panel-head">
+          <div>
+            <h1>Latent Rollout</h1>
+          </div>
+          <div class="panel-tools">
+            <div class="thought-indicator" id="thoughtIndicator" aria-label="Model idle">
+              <span class="bulb-icon" aria-hidden="true"></span>
+              <em id="thoughtText">thinking</em>
+              <span class="thought-spiral" aria-hidden="true"></span>
+            </div>
+            <span class="prescience-state" id="prescienceState">Idle</span>
+          </div>
+        </div>
+
+        <section class="model-block">
+          <div class="metric-grid">
+            <div class="metric">
+              <span>Value</span>
+              <strong id="valueScore">--</strong>
+            </div>
+            <div class="metric">
+              <span>Confidence</span>
+              <strong id="confidenceScore">--</strong>
+            </div>
+          </div>
+
+          <div class="maps">
+            <div class="mind-panel">
+              <div class="section-label">Action source</div>
+              <div class="mind-board" id="sourceMap" aria-label="Source square heatmap"></div>
+            </div>
+            <div class="mind-panel">
+              <div class="section-label">Action target</div>
+              <div class="mind-board" id="targetMap" aria-label="Target square heatmap"></div>
+            </div>
+            <div class="mind-panel">
+              <div class="section-label">Predicted next state</div>
+              <div class="mind-board" id="activationMap" aria-label="World-model next-state heatmap"></div>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+    <div class="result-burst" id="resultBurst" aria-live="polite"></div>
+    <div class="game-over-modal" id="gameOverModal" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle" hidden>
+      <div class="game-over-card">
+        <span class="section-label">Game over</span>
+        <h2 id="gameOverTitle">Game Over</h2>
+        <p id="gameOverMessage">The game has ended.</p>
+        <button id="restartGame" type="button">Restart</button>
+      </div>
+    </div>
+  </body>
+</html>
