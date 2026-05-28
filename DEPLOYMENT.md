@@ -1,4 +1,4 @@
-# Chess God Hosting Steps
+# Chess Hosting Steps
 
 The clean setup is:
 
