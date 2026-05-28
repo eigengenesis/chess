@@ -79,7 +79,7 @@ The chess benchmark is trained as a staged curriculum:
 3. Opening positions
 4. Middlegame positions
 5. Endgame positions
-6. Optional reinforcement learning against Stockfish
+6. RL against Stockfish and distillation
 
 Later phases mix in replay from earlier data so the model does not forget tactics and full-game behavior while specializing. The current checkpoint is pre-RL; reinforcement learning is the next step.
 
