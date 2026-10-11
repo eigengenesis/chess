@@ -10,6 +10,8 @@ Chess is one instantiation of VOID: a compact environment for studying spatial c
 
 The included [`chess.pt`](chess.pt) is a stripped **Phase 4, pre-RL checkpoint**: **11,045,201 parameters**, approximately **42 MiB**, with **16 recurrent thinking steps**. The hosted demo may use a later checkpoint.
 
+With the same frozen **Phase 4.5** checkpoint, Imagine increased score from **21.81% to 44.19%** across a 1,600-game Stockfish benchmark with paired openings and equal game clocks. See [the benchmark results](#stockfish-benchmark).
+
 ![The VOID chess model playing](chess.gif)
 
 ## Spatial Computation
@@ -73,11 +75,33 @@ The Ghost loop refines a representation of the current position. A world-model r
 
 **Direct mode** reads the policy after recurrent refinement and selects among moves permitted by `python-chess`. The learned legality head supplements training; it does not replace the rules engine.
 
-**Imagine mode** adds an experimental controller that evaluates action-conditioned predictions. The rollout path can examine a candidate move, an opponent reply, and a follow-up using predicted board tensors. This requires additional model calls beyond direct inference.
+**Imagine mode** adds fixed-width, model-guided lookahead: candidate move, legal opponent replies, and a follow-up. The repaired controller grounds every prediction in a valid rules state instead of repeatedly feeding potentially invalid predicted boards back into the transition head. It checks immediate mates and mating replies outside the policy shortlist. This requires additional model calls beyond direct inference.
 
-The current calibrated controller uses policy probability and next-state prediction surprise to estimate candidate quality. Surprise is measured against the exact legal successor supplied by the rules engine. An override must satisfy policy-proximity, imagined-value, and predicted-gain thresholds; otherwise it retains the direct choice. Calibration is tied to a checkpoint hash and falls back to direct selection when unavailable or incompatible.
+The benchmarked controller uses **six root candidates, two policy-ranked opponent replies, and three plies**, with sixteen recurrent steps for policy/value evaluation. Terminal and tactical safeguards can inspect moves outside those shortlists. It evaluates both exact legal states and one-step world-model predictions; disagreement limits the influence of predicted-state values when identifying the worst searched reply.
 
-This is **active-inference-inspired control**: learned dynamics inform action selection through predicted consequences and a preference score. The implemented score is a proxy, and the calibration uses Stockfish supervision. It does not establish the full variational free-energy formalism or show that recurrence inherently minimizes entropy.
+The validated preference controller then calibrates the selected exact-state value into win/draw/loss probabilities. Its score combines a policy-prior penalty with expected negative log preference over outcomes. A minimum policy probability and an override margin constrain changes to the direct choice; mate, tactical, and conversion safeguards take precedence. This calibration is bound to the checkpoint hash. The separate experimental energy reranker and probabilistic EFE variants were disabled for the benchmark.
+
+This is **active-inference-inspired control**: explicit outcome preferences guide action selection through predicted consequences. It uses fixed-width lookahead, **without MCTS**. Exact rules constrain the lookahead; the network supplies policy, value, and action-conditioned predictions. Stockfish supplied offline calibration labels and benchmark opponents; no Stockfish search runs inside Imagine's move selection. The implemented objective does not establish formal expected free energy or the broader Free Energy Principle.
+
+## Stockfish Benchmark
+
+Completed October 11, 2026, with one frozen Phase 4.5 checkpoint and no training during evaluation. Both modes used `n_think=16`, the same 100 held-out opening families, reversed colors, and **120 seconds + 1 second per move**. Each mode played 200 games against each Stockfish 19 `UCI_Elo` setting: **1,600 games total**. The machine was an Apple M2 with four simultaneous games and MPS inference.
+
+| Stockfish UCI_Elo setting | Direct score | Imagine score |
+|---|---:|---:|
+| 1500 | 39.75% | **74.25%** |
+| 1800 | 18.00% | **37.50%** |
+| 2000 | 20.00% | **36.00%** |
+| 2200 | 9.50% | **29.00%** |
+| Overall, 800 games per mode | 21.81% | **44.19%** |
+
+Score counts a win as 1 and a draw as 0.5. Imagine improved score at every setting. The paired improvement across the pool was **22.38 percentage points**, with a **95% opening-family bootstrap interval of 18.62 to 26.38 points**. All games completed, with no reference or infrastructure failures. One Imagine time forfeit remained in the results.
+
+The conditional rating fit was **1556 for Direct** (97.5% interval: 1516-1594) and **1823 for Imagine** (1788-1860). These are performance equivalents relative to Stockfish's configured labels under an assumed logistic score curve. Both observed score curves fit that assumption poorly, so the per-opponent scores are stronger evidence than a single rating. **This does not certify human/online Elo or establish 2000+ strength.**
+
+The result demonstrates improvement from the complete Imagine controller at equal game clocks, with additional computation. It does not isolate the contributions of world-model predictions, calibrated values, tactical safeguards, or lookahead. Mean model decision latency was approximately 0.15 seconds for Direct and 1.37-1.42 seconds for Imagine under this four-worker setup; hosting performance can differ.
+
+[Full results, protocol, and limitations](reports/stockfish_benchmark_20261010.md).
 
 ## Curriculum and Status
 
@@ -97,14 +121,16 @@ The current Phase 5 implementation provides `audit`, `gpu_improve`, and `gauntle
 
 ## Evidence and Open Questions
 
-A local calibration experiment over **2,000 positions**, using grouped nested five-fold cross-validation, reported:
+An earlier local calibration experiment over **2,000 positions**, using grouped nested five-fold cross-validation, reported:
 
 | Metric | Direct policy | Calibrated Imagine selector |
 |---|---:|---:|
 | Mean clipped Stockfish candidate loss | 53.92 cp | 52.70 cp |
 | Blunder rate | 13.80% | 13.45% |
 
-The reported 95% bootstrap interval for the reduction in clipped candidate loss was **[0.43, 2.11] cp**. The controller changed **0.75%** of positions. This is preliminary evidence for selective candidate ranking; paired game validation remains pending. Historical deterministic-start head-to-head wins do not establish an Elo increase across varied openings.
+The reported 95% bootstrap interval for the reduction in clipped candidate loss was **[0.43, 2.11] cp**. That earlier selector changed **0.75%** of positions; this static result is separate from the controller and game evidence above. Historical deterministic-start head-to-head wins do not establish an Elo increase across varied openings.
+
+A later probabilistic-controller experiment tested single-calibrator and ensemble variants (P1/P2) on 800 held-out positions from 80 opening families. Both changed only seven moves relative to the frozen baseline and failed their preregistered improvement gates. They remain disabled. Greater resemblance to an expected-free-energy objective has not yet demonstrated stronger play here.
 
 Learned transition errors also accumulate during rollout. A local Phase 4.5 fidelity evaluation on 400 starting positions reported piece F1 falling from approximately **0.77 at one step to 0.38 at three steps**, with no exact full-board matches. The world model's uncertainty and fidelity therefore matter when deciding whether its predictions should override the policy.
 
